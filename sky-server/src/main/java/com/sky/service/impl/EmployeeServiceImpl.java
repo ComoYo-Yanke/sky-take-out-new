@@ -5,6 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -120,4 +121,22 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .status(status).id(id).build();
         employeeMapper.update(employee);
     }
+    
+    @Override
+    public Employee getById(Long id){
+        Employee employee = employeeMapper.getById(id);
+        employee.setPassword("*****");
+        return employee;
+    }
+    
+    @Override
+    public void update(EmployeeDTO employeeDTO){
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        
+        employeeMapper.update(employee);
+    }
+    
 }
