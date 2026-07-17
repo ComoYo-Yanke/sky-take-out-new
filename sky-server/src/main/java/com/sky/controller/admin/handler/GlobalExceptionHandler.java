@@ -1,4 +1,4 @@
-package com.sky.handler;
+package com.sky.controller.admin.handler;
 
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.sky.constant.MessageConstant;
