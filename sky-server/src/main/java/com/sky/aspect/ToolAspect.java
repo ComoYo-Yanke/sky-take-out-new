@@ -7,6 +7,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Aspect
 @Component
 @Slf4j
@@ -17,6 +19,6 @@ public class ToolAspect {
     
     @After("toolPointCut()")
     public void cue(){
-        log.info("当前操作用户:{}", BaseContext.getCurrentId());
+        log.info("当前操作信息:{},{}", BaseContext.getCurrentId(), LocalDateTime.now());
     }
 }

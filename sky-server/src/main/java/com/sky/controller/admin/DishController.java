@@ -1,13 +1,17 @@
 package com.sky.controller.admin;
 
+import com.google.gson.internal.bind.JsonAdapterAnnotationTypeAdapterFactory;
 import com.sky.constant.MessageConstant;
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.entity.Dish;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -46,4 +50,29 @@ public class DishController {
         dishService.deleteBatch(ids);
         return Result.success();
     }
+    
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询菜品")
+    public Result<DishVO> getById(@PathVariable Long id){
+        log.info("根据id查询菜品：{}",id);
+        DishVO dishVO = dishService.getByIdWithFlavor(id);
+        return Result.success(dishVO);
+    }
+    
+    @PutMapping
+    @ApiOperation("菜品修改")
+    public Result update(@RequestBody DishDTO dishDTO){
+        log.info("修改菜品：{}", dishDTO);
+        dishService.updateWithFlavor(dishDTO);
+        return Result.success();
+    }
+    
+    @PostMapping("/status/{status}")
+    @ApiOperation("修改菜品状态")
+    public Result updateStatusById(@PathVariable Integer status,@RequestParam Long id){
+        log.info("修改菜品状态：{},{}", status, id);
+        dishService.updateStatusById(status, id);
+        return Result.success();
+    }
+    
 }
