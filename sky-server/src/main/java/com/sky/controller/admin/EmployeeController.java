@@ -1,6 +1,7 @@
 package com.sky.controller.admin;
 
 import com.sky.constant.JwtClaimsConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
@@ -60,7 +61,7 @@ public class EmployeeController {
                 .name(employee.getName())
                 .token(token)
                 .build();
-
+        BaseContext.setCurrentId(employeeLoginVO.getId()); // 保存当前登录员工id
         return Result.success(employeeLoginVO);
     }
     

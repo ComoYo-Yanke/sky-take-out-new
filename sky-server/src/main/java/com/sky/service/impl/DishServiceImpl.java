@@ -1,12 +1,22 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.DishDTO;
+import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.SetmealDishMapper;
+import com.sky.result.PageResult;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.bridge.MessageWriter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,17 +27,17 @@ import java.util.List;
 @Service
 @Slf4j
 public class DishServiceImpl implements DishService {
-    
-    
+    @Autowired
     private DishMapper dishMapper;
     private DishFlavorMapper dishFlavorMapper;
-    public DishServiceImpl(DishMapper dishMapper, DishFlavorMapper dishFlavorMapper){
-        this.dishMapper = dishMapper;
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
+    public DishServiceImpl(DishFlavorMapper dishFlavorMapper){
         this.dishFlavorMapper = dishFlavorMapper;
     }
     
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class})
     public void saveWithFlavor(DishDTO dishDTO){
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO, dish);
@@ -45,6 +55,55 @@ public class DishServiceImpl implements DishService {
             });
             // 2.向口味表插入n条数据
             dishFlavorMapper.insertBatch(flavors);
+        }
+        
+    }
+    
+    @Override
+    public PageResult pageQuery(DishPageQueryDTO dto){
+        PageHelper.startPage(dto.getPage(), dto.getPageSize());
+        Page<DishVO> page = dishMapper.pageQuery(dto);
+        log.info("分页查询结果：{}", page);
+        return new PageResult(page.getTotal(), page.getResult());
+    }
+    
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
+    public void deleteBatch(List<Long> ids){
+//        try{
+//            for(int i = 0; i<ids.size(); i++){
+//                Long id = ids.get(i);
+//                if(dishMapper.queryStatus(id) == 0){
+//                    dishMapper.deleteBatch(id);
+//                    dishFlavorMapper.deleteBatch(id);
+//                }else{
+//                    return false;
+//                }
+//            }
+//        }catch (Exception e){
+//            log.info("错误:{}",e.getMessage());
+//            return false;
+//        }
+//
+//        return true;
+        
+        for(Long id : ids){
+            Dish dish = dishMapper.getById(id);
+            if(dish.getStatus() == StatusConstant.ENABLE){
+                // 当前菜品处于起售中，不能删除
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+            }
+        }
+        // 判断当前套餐是否能够删除--是否和套餐关联?
+        List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
+        if(setmealIds != null && setmealIds.size() > 0){
+            // 当前菜品被套餐关联
+            throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
+        }
+        
+        for(Long id : ids){
+            dishMapper.deleteById(id);
+            dishFlavorMapper.deleteByDishId(id);
         }
         
     }
