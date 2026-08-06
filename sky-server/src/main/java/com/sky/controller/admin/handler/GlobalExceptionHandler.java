@@ -4,8 +4,10 @@ import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.sky.constant.MessageConstant;
 import com.sky.exception.BaseException;
 import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.SetmealEnableFailedException;
 import com.sky.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.text.StrTokenizer;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -54,6 +56,11 @@ public class GlobalExceptionHandler {
     public Result exceptionHandler(DeletionNotAllowedException e){
         String msg = e.getMessage();
         return Result.error(msg);
+    }
+    
+    @ExceptionHandler
+    public Result exceptionHandler(SetmealEnableFailedException e){
+        return Result.error(e.getMessage());
     }
 
 }
