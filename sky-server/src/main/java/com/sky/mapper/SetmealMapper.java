@@ -51,5 +51,5 @@ public interface SetmealMapper {
     void deleteById(Long setmealId);
     
     
-    
+    void update(Setmeal setmeal);
 }
