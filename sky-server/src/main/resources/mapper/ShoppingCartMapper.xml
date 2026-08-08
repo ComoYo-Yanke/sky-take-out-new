@@ -28,4 +28,14 @@
             (#{sc.name},#{sc.image},#{sc.userId},#{sc.dishId},#{sc.setmealId},#{sc.dishFlavor},#{sc.number},#{sc.amount},#{sc.createTime})
         </foreach>
     </insert>
+
+    <update id="update" parameterType="ShoppingCart">
+        update shopping_cart
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="image != null">image = #{image},</if>
+        </set>
+    </update>
+
 </mapper>
